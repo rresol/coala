@@ -68,5 +68,28 @@ class SourceRangeTest(unittest.TestCase):
             SourceRange(self.result_fileB_noline, self.result_fileB_line2) < 1
 
 
+class SourceRangeExpandTest(unittest.TestCase):
+
+    def test_expand(self):
+        empty_position = SourcePosition("filename")
+        file = ["abc\n", "def\n", "ghi\n"]
+        empty_range = SourceRange(empty_position, empty_position)
+        full_range = SourceRange.from_values("filename", 1, 1, 3, 4)
+        self.assertEqual(empty_range.expand(file), full_range)
+
+    def test_expand_none(self):
+        start_position = SourcePosition("filename", 2, 2)
+        end_position = SourcePosition("filename", 3, 2)
+        file = ["abc\n", "def\n", "ghi\n"]
+        text_range = SourceRange(start_position, end_position)
+        self.assertEqual(text_range.expand(file), text_range)
+
+    def test_expand_semi(self):
+        file = ["abc\n", "defg\n", "hijkl\n", "mnopqr\n"]
+        semi_range = SourceRange.from_values("filename", None, None, 3, None)
+        full_range = SourceRange.from_values("filename", 1, 1, 3, 6)
+        self.assertEqual(semi_range.expand(file), full_range)
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

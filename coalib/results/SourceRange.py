@@ -58,3 +58,26 @@ class SourceRange(TextRange):
     @property
     def file(self):
         return self.start.file
+
+    def expand(self, file_contents):
+        """
+        Passes a new SourceRange that covers the same area of a file as this
+        one would. All values of None get replaced with absolute values.
+
+        values of None will be interpreted as follows:
+        self.start.line is None:   -> 1
+        self.start.column is None: -> 1
+        self.end.line is None:     -> last line of file
+        self.end.column is None:   -> last column of self.end.line
+
+        :param file_contents: File contents of the applicable file
+        :return:              TextRange with absolute values
+        """
+        end_line = self.end.line or len(file_contents)
+
+        return self.__class__.from_values(
+            self.file,
+            self.start.line or 1,
+            self.start.column or 1,
+            end_line,
+            self.end.column or len(file_contents[end_line - 1]))
